@@ -51,12 +51,12 @@
     "access": "public"
   },
   "scripts": {
-    "build": "pnpm run build:platform && pnpm run build:wasm",
+    "build": "bun run build:platform && bun run build:wasm",
     "build:platform": "napi build --platform --release",
-    "postbuild:platform": "node ./scripts/move-artifacts.mjs",
+    "postbuild:platform": "bun ./scripts/move-artifacts.mjs",
     "build:wasm": "napi build --release --target wasm32-wasip1-threads",
-    "postbuild:wasm": "node ./scripts/move-artifacts.mjs",
-    "dev": "cargo watch --quiet --shell 'npm run build'",
+    "postbuild:wasm": "bun ./scripts/move-artifacts.mjs",
+    "dev": "cargo watch --quiet --shell 'bun run build'",
     "build:debug": "napi build --platform",
     "version": "napi version"
   },

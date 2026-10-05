@@ -15,7 +15,7 @@
   "scripts": {
     "lint": "tsc --noEmit",
     "build": "tsup-node",
-    "dev": "pnpm run build -- --watch",
+    "dev": "bun run build -- --watch",
     "test:ui": "playwright test"
   },
   "exports": {

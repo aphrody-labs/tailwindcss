@@ -13,7 +13,7 @@
   "scripts": {
     "lint": "tsc --noEmit",
     "build": "tsup-node",
-    "dev": "pnpm run build -- --watch"
+    "dev": "bun run build -- --watch"
   },
   "bin": {
     "tailwindcss": "./dist/index.mjs"

@@ -44,7 +44,7 @@ A webpack loader for Tailwind CSS v4.
 ## Installation
 
 ```sh
-npm install @tailwindcss/webpack
+bun install @tailwindcss/webpack
 ```
 
 ### Usage

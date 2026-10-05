@@ -44,7 +44,7 @@ A Turbopack loader for Tailwind CSS v4.
 ## Installation
 
 ```sh
-npm install @tailwindcss/turbopack
+bun install @tailwindcss/turbopack
 ```
 
 ### Usage
