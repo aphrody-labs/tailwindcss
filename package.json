@@ -37,10 +37,7 @@
     "build": "turbo build --filter=!./playgrounds/*",
     "postbuild": "bun ./scripts/pack-packages.mjs",
     "dev": "turbo dev --filter=!./playgrounds/*",
-    "test": "cargo test && vitest run --hideSkippedTests",
-    "test:integrations": "vitest --root=./integrations",
-    "test:ui": "bun run --filter=tailwindcss test:ui && bun run --filter=@tailwindcss/browser test:ui",
-    "tdd": "vitest --hideSkippedTests",
+
     "bench": "vitest bench",
     "version-packages": "bun ./scripts/version-packages.mjs",
     "vite": "bun run --filter=vite-playground dev",
@@ -60,5 +57,53 @@
     "typescript": "^5.9.3",
     "vitest": "^4.1.10"
   },
-  "packageManager": "pnpm@11.9.0"
+  "packageManager": "bun@1.4.2",
+  "workspaces": {
+    "packages": [
+      "crates/node",
+      "crates/node/npm/*",
+      "packages/*",
+      "playgrounds/*",
+      "integrations"
+    ],
+    "catalog": {
+      "@types/node": "22.20.1",
+      "dedent": "1.7.2",
+      "enhanced-resolve": "^5.24.5",
+      "lightningcss-darwin-arm64": "1.33.0",
+      "lightningcss-darwin-x64": "1.33.0",
+      "lightningcss-linux-arm64-gnu": "1.33.0",
+      "lightningcss-linux-arm64-musl": "1.33.0",
+      "lightningcss-linux-x64-gnu": "1.33.0",
+      "lightningcss-linux-x64-musl": "1.33.0",
+      "lightningcss-win32-x64-msvc": "1.33.0",
+      "lightningcss": "1.33.0",
+      "@parcel/watcher-darwin-arm64": "2.6.0",
+      "@parcel/watcher-darwin-x64": "2.6.0",
+      "@parcel/watcher-linux-arm64-glibc": "2.6.0",
+      "@parcel/watcher-linux-arm64-musl": "2.6.0",
+      "@parcel/watcher-linux-x64-glibc": "2.6.0",
+      "@parcel/watcher-linux-x64-musl": "2.6.0",
+      "@parcel/watcher-win32-x64": "2.6.0",
+      "@parcel/watcher": "2.6.0",
+      "postcss": "^8.5.25",
+      "prettier": "3.9.6",
+      "vite": "^8.2.0",
+      "webpack": "^5.109.2"
+    }
+  },
+  "patchedDependencies": {
+    "@napi-rs/cli@3.7.4": "patches/@napi-rs__cli@3.7.4.patch",
+    "@parcel/watcher@2.6.0": "patches/@parcel__watcher@2.6.0.patch",
+    "lightningcss@1.33.0": "patches/lightningcss@1.33.0.patch"
+  },
+  "trustedDependencies": [
+    "@parcel/watcher",
+    "bun",
+    "esbuild",
+    "sharp",
+    "tree-sitter",
+    "tree-sitter-javascript",
+    "tree-sitter-typescript"
+  ]
 }

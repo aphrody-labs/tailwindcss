@@ -49,7 +49,7 @@ for (let [name, paths] of syncedWorkspaces) {
 }
 
 exec(
-  "pnpm --silent --filter='!./playgrounds/*' --filter='!./integrations' --filter='!./packages/internal-example-plugin' -r exec pwd",
+  "bun ./scripts/aphrody/workspaces.ts --filter='!./playgrounds/*' --filter='!./integrations' --filter='!./packages/internal-example-plugin'",
   async (err, stdout) => {
     if (err) {
       console.error(err)

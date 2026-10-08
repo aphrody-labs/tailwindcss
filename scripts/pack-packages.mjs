@@ -1,14 +1,12 @@
 import { exec, execSync } from 'node:child_process'
 import fs from 'node:fs/promises'
-import { platform } from 'node:os'
 import path, { dirname } from 'node:path'
 import url from 'node:url'
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url))
 let root = path.resolve(__dirname, '..')
 
-let command = platform() === 'win32' ? 'cd' : 'pwd'
-let rawPaths = execSync(`pnpm --silent --filter=!./playgrounds/* -r exec ${command}`).toString()
+let rawPaths = execSync('bun ./scripts/aphrody/workspaces.ts --filter=!./playgrounds/*').toString()
 
 let paths = rawPaths
   .trim()
@@ -35,11 +33,8 @@ Promise.all(
   [...workspaces.entries()].map(async ([name, { dir, hasBundledDependencies }]) => {
     function pack() {
       return new Promise((resolve) => {
-        // `bundledDependencies` can only be packed with the hoisted node linker
-        // since pnpm v10. We opt into it for those packages only, instead of
-        // changing the node linker for the entire workspace.
         exec(
-          `pnpm pack --pack-gzip-level=0 --pack-destination="${path.join(root, 'dist').replace(/\\/g, '\\\\')}"${hasBundledDependencies ? ' --config.node-linker=hoisted' : ''}`,
+          `bun pm pack --quiet --gzip-level=0 --destination="${path.join(root, 'dist').replace(/\\/g, '\\\\')}"`,
           { cwd: dir },
           (err, stdout, stderr) => {
             if (err) {

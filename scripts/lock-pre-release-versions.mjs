@@ -3,7 +3,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import prettier from 'prettier'
 
-exec('pnpm --silent --filter=!./playgrounds/* -r exec pwd', async (err, stdout) => {
+exec('bun ./scripts/aphrody/workspaces.ts --filter=!./playgrounds/*', async (err, stdout) => {
   if (err) {
     console.error(err)
     process.exit(1)
@@ -38,7 +38,7 @@ exec('pnpm --silent --filter=!./playgrounds/* -r exec pwd', async (err, stdout) 
         if (version === 'workspace:*' || !version.startsWith('workspace:')) continue
 
         // Set the version to `workspace:*`, we don't need to know the exact
-        // version because `pnpm` will handle it for us at publishing time.
+        // version because `bun publish` will handle it for us at publishing time.
         pkg[group][name] = 'workspace:*'
 
         // Whether or not we should update the `package.json` file.

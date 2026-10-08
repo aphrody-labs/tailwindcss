@@ -1,0 +1,8 @@
+# Aphrody fork: Bun is the package manager and the test runner (see APHRODY.md).
+
+[install]
+linker = "isolated"
+
+[test]
+# Playwright specs run with `bun run test:ui`; integrations with `bun run test:integrations`.
+pathIgnorePatterns = ["**/*.spec.ts", "integrations/**", "playgrounds/**", "**/node_modules/**"]
