@@ -41,7 +41,9 @@ jobs:
       - name: Setup WASM target
         run: rustup target add wasm32-wasip1-threads
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        # The standalone CLI bundles every platform's lightningcss/@parcel/watcher binary (devDependencies
+        # that pnpm installs whatever the host); Bun installs them only when asked for those platforms.
+        run: bun install --frozen-lockfile --os=darwin --os=linux --os=win32 --cpu=x64 --cpu=arm64
       - name: Fork checks
         run: |
           bun scripts/aphrody/bunify.ts --check

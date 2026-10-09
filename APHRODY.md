@@ -19,6 +19,9 @@ through npm aliases (`"tailwindcss": "npm:@aphrody/tailwindcss@<v>"`), so `@impo
 
 - `bun install` (lockfile `bun.lock`, isolated linker). Workspaces, catalog, patched dependencies and the build allow
   list live in the root `package.json`; `pnpm-workspace.yaml` and `pnpm-lock.yaml` are removed.
+- The standalone CLI bundles every platform's lightningcss and @parcel/watcher binary. pnpm installs those
+  devDependencies whatever the host; Bun skips other platforms, so a full build installs with
+  `bun install --os=darwin --os=linux --os=win32 --cpu=x64 --cpu=arm64` (as CI does).
 - `bun run build`, `bun run test` (`cargo test && bun test`), `bun run test:integrations`.
 - `bun run build:fast` (`scripts/aphrody/fast-build.ts`): JS-only dev build of tailwindcss, node, postcss, cli and
   browser with `Bun.build`; no oxide binding, no `.d.ts`, not used by CI or releases.
