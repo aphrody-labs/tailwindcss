@@ -4,5 +4,6 @@
 linker = "isolated"
 
 [test]
+preload = ["./scripts/aphrody/test-preload.ts"]
 # Playwright specs run with `bun run test:ui`; integrations with `bun run test:integrations`.
 pathIgnorePatterns = ["**/*.spec.ts", "integrations/**", "playgrounds/**", "**/node_modules/**"]
