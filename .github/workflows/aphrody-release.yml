@@ -1,0 +1,195 @@
+name: Aphrody release
+
+# Builds the oxide bindings for every platform, then publishes the @aphrody
+# npm packages (scripts/aphrody/publish-npm.ts) and the aphrody-tailwindcss-*
+# crates (scripts/aphrody/publish-crates.ts) at the same <upstream>-aphrody.<n>
+# version. Secrets: NPM_TOKEN, CARGO_REGISTRY_TOKEN.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (default: next <upstream>-aphrody.<n>)'
+        required: false
+      dry-run:
+        description: Stage and dry-run without publishing
+        type: boolean
+        default: false
+  push:
+    tags: ['aphrody-v*']
+
+permissions:
+  contents: read
+
+env:
+  OXIDE_LOCATION: ./crates/node
+
+concurrency:
+  group: aphrody-release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.repository == 'aphrody-labs/tailwindcss'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: windows-latest, target: x86_64-pc-windows-msvc, dir: win32-x64-msvc }
+          - { os: windows-latest, target: aarch64-pc-windows-msvc, dir: win32-arm64-msvc }
+          - { os: macos-latest, target: x86_64-apple-darwin, dir: darwin-x64, strip: strip -x }
+          - {
+              os: macos-latest,
+              target: aarch64-apple-darwin,
+              dir: darwin-arm64,
+              strip: strip -x,
+              page-size: 14,
+            }
+          - os: ubuntu-latest
+            target: aarch64-linux-android
+            dir: android-arm64
+            strip: ${ANDROID_NDK_LATEST_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip
+          - os: ubuntu-latest
+            target: armv7-linux-androideabi
+            dir: android-arm-eabi
+            strip: ${ANDROID_NDK_LATEST_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip
+          - {
+              os: ubuntu-latest,
+              target: x86_64-unknown-linux-gnu,
+              dir: linux-x64-gnu,
+              strip: strip,
+              flags: --use-napi-cross,
+            }
+          - {
+              os: ubuntu-latest,
+              target: aarch64-unknown-linux-gnu,
+              dir: linux-arm64-gnu,
+              strip: aarch64-linux-gnu-strip,
+              flags: --use-napi-cross,
+            }
+          - {
+              os: ubuntu-latest,
+              target: armv7-unknown-linux-gnueabihf,
+              dir: linux-arm-gnueabihf,
+              strip: arm-linux-gnueabihf-strip,
+              flags: --use-napi-cross,
+            }
+          - {
+              os: ubuntu-latest,
+              target: aarch64-unknown-linux-musl,
+              dir: linux-arm64-musl,
+              strip-zig: true,
+              flags: -x,
+            }
+          - {
+              os: ubuntu-latest,
+              target: x86_64-unknown-linux-musl,
+              dir: linux-x64-musl,
+              strip: strip,
+              flags: -x,
+            }
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Cross toolchains
+        if: matrix.target == 'armv7-unknown-linux-gnueabihf' || matrix.target == 'aarch64-unknown-linux-gnu'
+        run: sudo apt-get update && sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf binutils-aarch64-linux-gnu
+      - uses: mlugg/setup-zig@v2
+        if: contains(matrix.target, 'musl')
+        with:
+          version: 0.14.1
+      - uses: taiki-e/install-action@v2
+        if: contains(matrix.target, 'musl')
+        with:
+          tool: cargo-zigbuild
+      - run: rustup target add ${{ matrix.target }}
+      - run: bun install --frozen-lockfile --ignore-scripts
+      - name: Build binding
+        working-directory: ${{ env.OXIDE_LOCATION }}
+        run: bun x napi build --platform --release --target=${{ matrix.target }} ${{ matrix.flags }}
+        env:
+          RUST_TARGET: ${{ matrix.target }}
+          JEMALLOC_SYS_WITH_LG_PAGE: ${{ matrix.page-size }}
+      - name: Strip
+        if: matrix.strip || matrix.strip-zig
+        shell: bash
+        run: |
+          if [ "${{ matrix.strip-zig }}" = "true" ]; then
+            for f in ${{ env.OXIDE_LOCATION }}/*.node; do zig objcopy --strip-all "$f" "$f.s" && mv "$f.s" "$f"; done
+          else
+            eval "${{ matrix.strip }} ${{ env.OXIDE_LOCATION }}/*.node"
+          fi
+      - uses: actions/upload-artifact@v6
+        with:
+          name: bindings-${{ matrix.dir }}
+          path: ${{ env.OXIDE_LOCATION }}/*.node
+
+  # Bun has no FreeBSD build: this binding is built with Node's napi CLI in a VM.
+  build-freebsd:
+    if: github.repository == 'aphrody-labs/tailwindcss'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: cross-platform-actions/action@v0.25.0
+        env:
+          RUSTUP_IO_THREADS: 1
+        with:
+          operating_system: freebsd
+          version: '14.0'
+          memory: 13G
+          cpu_count: 3
+          environment_variables: RUSTUP_IO_THREADS
+          shell: bash
+          run: |
+            sudo pkg install -y -f curl node npm
+            curl -sSf https://static.rust-lang.org/rustup/archive/1.27.1/x86_64-unknown-freebsd/rustup-init -o rustup-init
+            chmod +x rustup-init && ./rustup-init -y --profile minimal && source "$HOME/.cargo/env"
+            cd crates/node && npx --yes @napi-rs/cli@3.7.4 build --platform --release && strip -x *.node
+      - uses: actions/upload-artifact@v6
+        with:
+          name: bindings-freebsd-x64
+          path: ${{ env.OXIDE_LOCATION }}/*.node
+
+  publish:
+    needs: [build, build-freebsd]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: rustup target add wasm32-wasip1-threads
+      - run: bun install --frozen-lockfile
+      - uses: actions/download-artifact@v7
+        with:
+          path: ${{ env.OXIDE_LOCATION }}/artifacts
+      - name: Place bindings
+        run: bun scripts/aphrody/place-bindings.ts crates/node/artifacts
+      - name: Build
+        run: bun run build
+      - run: bun ./scripts/pre-publish-optimizations.mjs
+      - name: Resolve version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: echo "APHRODY_VERSION=${INPUT_VERSION:-$(bun scripts/aphrody/publish-npm.ts --print-version)}" >> "$GITHUB_ENV"
+      - name: Publish npm
+        run: bun scripts/aphrody/publish-npm.ts --version=$APHRODY_VERSION --require-native ${{ inputs.dry-run && '--dry-run' || '' }}
+        env:
+          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish crates
+        run: bun scripts/aphrody/publish-crates.ts --version=$APHRODY_VERSION ${{ inputs.dry-run && '--dry-run' || '' }}
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}

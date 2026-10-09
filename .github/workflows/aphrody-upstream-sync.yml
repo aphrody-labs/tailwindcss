@@ -1,0 +1,43 @@
+name: Aphrody upstream sync
+
+# Merges tailwindlabs/tailwindcss main into the fork's main every 6 hours and
+# keeps it on Bun (scripts/aphrody/sync-upstream.ts). A conflict beyond the
+# Bun rewrite fails the run and leaves main untouched.
+
+permissions:
+  contents: read
+
+on:
+  schedule:
+    - cron: '23 */6 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: aphrody-upstream-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.repository == 'aphrody-labs/tailwindcss'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      # GITHUB_TOKEN cannot push merges that touch .github/workflows; a token
+      # with the `workflow` scope goes in APHRODY_SYNC_TOKEN.
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.APHRODY_SYNC_TOKEN || github.token }}
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Merge upstream
+        run: |
+          git config user.name "aphrody-dev"
+          git config user.email "contact@aphrody.com"
+          git remote add upstream https://github.com/tailwindlabs/tailwindcss.git
+          bun test scripts/aphrody/aphrody.test.ts
+          bun scripts/aphrody/sync-upstream.ts --push --no-index

@@ -1,0 +1,63 @@
+name: Aphrody CI
+
+# Bun-only CI of the fork: bun install, build (oxide through napi), bun test,
+# cargo test. Upstream's ci.yml stays disabled on the fork.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    if: github.repository == 'aphrody-labs/tailwindcss'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-15]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Setup WASM target
+        run: rustup target add wasm32-wasip1-threads
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Fork checks
+        run: |
+          bun scripts/aphrody/bunify.ts --check
+          bun scripts/aphrody/scope.ts --check
+      - name: Build
+        run: bun run build
+        env:
+          CARGO_PROFILE_RELEASE_LTO: 'off'
+          CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_LINKER: 'lld-link'
+      - name: Test
+        run: bun run test
+      - name: Integrations
+        if: matrix.os == 'ubuntu-latest'
+        # Test projects are installed with pnpm, like a user's project would be.
+        run: |
+          bun add -g pnpm
+          bun run test:integrations

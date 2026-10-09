@@ -13,9 +13,17 @@ import { createLineTable } from '../packages/tailwindcss/src/source-maps/line-ta
 import { escape } from '../packages/tailwindcss/src/utils/escape'
 
 const REPO_ROOT = path.join(__dirname, '..')
-const ROOT_PNPM_WORKSPACE = Yaml.parse(
-  await fs.readFile(path.join(REPO_ROOT, 'pnpm-workspace.yaml'), 'utf8'),
-)
+// The fork keeps its workspace config in package.json (no pnpm-workspace.yaml).
+// Test projects are still installed with pnpm, as a user would; they inherit
+// the build allow list from the root trustedDependencies.
+const ROOT_PNPM_WORKSPACE = {
+  allowBuilds: Object.fromEntries(
+    (
+      JSON.parse(await fs.readFile(path.join(REPO_ROOT, 'package.json'), 'utf8'))
+        .trustedDependencies ?? []
+    ).map((name: string) => [name, true]),
+  ),
+}
 const PUBLIC_PACKAGES = (await fs.readdir(path.join(REPO_ROOT, 'dist'))).map((name) =>
   name.replace('tailwindcss-', '@tailwindcss/').replace('.tgz', ''),
 )

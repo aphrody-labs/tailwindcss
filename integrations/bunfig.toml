@@ -1,0 +1,6 @@
+# Integration suite (bun run test:integrations): builds and packs first (bun run build),
+# then installs each test project from dist/*.tgz.
+
+[test]
+timeout = 120000
+pathIgnorePatterns = ["**/node_modules/**"]
