@@ -3,8 +3,11 @@
 // Each crate is copied to dist/aphrody-crates/<name>/ with a rewritten
 // Cargo.toml: new package name, `[lib] name` kept so `use ignore::...` still
 // compiles, path dependencies on sibling crates turned into
-// `<lib> = { package = "<new name>", version = "=<v>" }`, and the metadata
-// crates.io requires. Versions already on crates.io are skipped.
+// `<lib> = { package = "<new name>", version = "=<v>", path = "../<new name>" }`
+// (cargo drops `path` from what it uploads), and the metadata crates.io requires.
+// dist/aphrody-crates/ is a cargo workspace of the staged crates, so --dry-run
+// packages them together (`cargo publish --workspace`) before any is on crates.io.
+// Versions already on crates.io are skipped.
 //
 //   bun scripts/aphrody/publish-crates.ts [--version=4.3.3-aphrody.1] [--dry-run]
 //
@@ -48,7 +51,7 @@ export function stagedToml(crate: Crate, toml: string, versions: Record<string, 
     let re = new RegExp(`^${dep.upstream}\\s*=\\s*\\{\\s*path\\s*=\\s*"[^"]+"\\s*\\}`, 'm')
     out = out.replace(
       re,
-      `${dep.lib.replaceAll('_', '-')} = { package = "${dep.name}", version = "=${versions[dep.upstream]}" }`,
+      `${dep.lib.replaceAll('_', '-')} = { package = "${dep.name}", version = "=${versions[dep.upstream]}", path = "../${dep.name}" }`,
     )
   }
   return out
@@ -75,14 +78,14 @@ async function main() {
   let versions = Object.fromEntries(
     CRATES.map((c) => [c.upstream, pinned ?? crateVersion(tomls[c.upstream])]),
   )
-  let failed: string[] = []
-  // CRATES is in dependency order: macros, ignore, oxide.
+  let run = (args: string[]) =>
+    Bun.spawnSync(['cargo', 'publish', '--allow-dirty', ...args], {
+      cwd: stageRoot,
+      stdout: 'inherit',
+      stderr: 'inherit',
+      env: process.env,
+    }).exitCode
   for (let crate of CRATES) {
-    let version = versions[crate.upstream]
-    if (!dryRun && (await isPublished(crate.name, version))) {
-      console.log(`skip ${crate.name}@${version}: already published`)
-      continue
-    }
     let stage = join(stageRoot, crate.name)
     cpSync(join(ROOT, crate.dir), stage, {
       recursive: true,
@@ -92,20 +95,30 @@ async function main() {
       if (!existsSync(join(stage, f)) && existsSync(join(ROOT, f)))
         cpSync(join(ROOT, f), join(stage, f))
     await Bun.write(join(stage, 'Cargo.toml'), stagedToml(crate, tomls[crate.upstream], versions))
-    // The staged crate is outside the cargo workspace; give it its own.
-    await Bun.write(
-      join(stage, 'Cargo.toml'),
-      (await Bun.file(join(stage, 'Cargo.toml')).text()) + '\n[workspace]\n',
-    )
-    let cmd = ['cargo', 'publish', '--allow-dirty', ...(dryRun ? ['--dry-run', '--no-verify'] : [])]
-    let proc = Bun.spawnSync(cmd, {
-      cwd: stage,
-      stdout: 'inherit',
-      stderr: 'inherit',
-      env: process.env,
-    })
-    if (proc.exitCode !== 0) failed.push(`${crate.name}: cargo publish exited ${proc.exitCode}`)
-    else console.log(`${dryRun ? 'checked' : 'published'} ${crate.name}@${version}`)
+  }
+  await Bun.write(
+    join(stageRoot, 'Cargo.toml'),
+    `[workspace]
+resolver = "2"
+members = ${JSON.stringify(CRATES.map((c) => c.name))}
+`,
+  )
+  let failed: string[] = []
+  if (dryRun) {
+    let code = run(['--workspace', '--dry-run', '--no-verify'])
+    if (code !== 0) failed.push(`cargo publish --workspace --dry-run exited ${code}`)
+    else for (let crate of CRATES) console.log(`checked ${crate.name}@${versions[crate.upstream]}`)
+  }
+  // CRATES is in dependency order: macros, ignore, oxide.
+  for (let crate of dryRun ? [] : CRATES) {
+    let version = versions[crate.upstream]
+    if (await isPublished(crate.name, version)) {
+      console.log(`skip ${crate.name}@${version}: already published`)
+      continue
+    }
+    let code = run(['-p', crate.name])
+    if (code !== 0) failed.push(`${crate.name}: cargo publish exited ${code}`)
+    else console.log(`published ${crate.name}@${version}`)
   }
   for (let f of failed) console.error(f)
   if (failed.length) process.exit(1)

@@ -146,9 +146,11 @@ describe('publish-crates', () => {
     let out = stagedToml(oxide, toml, versions)
     expect(out).toContain('name = "aphrody-tailwindcss-oxide"')
     expect(out).toContain('version = "1.0.0"')
-    expect(out).toContain('ignore = { package = "aphrody-tailwindcss-ignore", version = "=1.0.0" }')
     expect(out).toContain(
-      'classification-macros = { package = "aphrody-tailwindcss-classification-macros", version = "=1.0.0" }',
+      'ignore = { package = "aphrody-tailwindcss-ignore", version = "=1.0.0", path = "../aphrody-tailwindcss-ignore" }',
+    )
+    expect(out).toContain(
+      'classification-macros = { package = "aphrody-tailwindcss-classification-macros", version = "=1.0.0", path = "../aphrody-tailwindcss-classification-macros" }',
     )
     expect(out).toContain('name = "tailwindcss_oxide"')
     expect(out).toContain('license = "MIT"')
