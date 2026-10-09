@@ -34,7 +34,8 @@
   "scripts": {
     "format": "prettier --write .",
     "lint": "prettier --check . && turbo lint",
-    "build": "turbo build --filter=!./playgrounds/*",
+    "build": "bun ./scripts/aphrody/fast-build.ts",
+    "build:fast": "bun ./scripts/aphrody/fast-build.ts",
     "postbuild": "bun ./scripts/pack-packages.mjs",
     "dev": "turbo dev --filter=!./playgrounds/*",
     "test": "cargo test && bun test",

@@ -1,5 +1,6 @@
 import QuickLRU from '@alloc/quick-lru'
 import {
+  compile,
   compileAst,
   env,
   Features,
@@ -27,6 +28,7 @@ interface CacheEntry {
   cachedPostCssAst: Root
   optimizedPostCssAst: Root
   fullRebuildPaths: string[]
+  candidateHash: string
 }
 const cache = new QuickLRU<string, CacheEntry>({ maxSize: 50 })
 
@@ -44,6 +46,7 @@ function getContextFromCache(postcss: Postcss, inputFile: string, opts: PluginOp
     optimizedPostCssAst: postcss.root(),
 
     fullRebuildPaths: [] as string[],
+    candidateHash: '',
   }
   cache.set(key, entry)
   return entry
@@ -246,6 +249,12 @@ function tailwindcss(opts: PluginOptions = {}): AcceptedPlugin {
             let candidates = compiler.features & Features.Utilities ? context.scanner.scan() : []
             DEBUG && I.end('Scan for candidates')
 
+            DEBUG && I.start('Hash candidates')
+            let candidateHash = await hashCandidates(candidates)
+            let candidatesChanged = candidateHash !== context.candidateHash
+            context.candidateHash = candidateHash
+            DEBUG && I.end('Hash candidates')
+
             if (compiler.features & Features.Utilities) {
               DEBUG && I.start('Register dependency messages')
               // Add all found files as direct dependencies
@@ -296,38 +305,40 @@ function tailwindcss(opts: PluginOptions = {}): AcceptedPlugin {
               DEBUG && I.end('Register dependency messages')
             }
 
-            DEBUG && I.start('Build utilities')
-            let tailwindCssAst = compiler.build(candidates)
-            DEBUG && I.end('Build utilities')
+            if (candidatesChanged || context.tailwindCssAst.length === 0 || rebuildStrategy === 'full') {
+              DEBUG && I.start('Build utilities')
+              let tailwindCssAst = compiler.build(candidates)
+              DEBUG && I.end('Build utilities')
 
-            if (context.tailwindCssAst !== tailwindCssAst) {
-              if (optimize) {
-                DEBUG && I.start('Optimization')
+              if (context.tailwindCssAst !== tailwindCssAst) {
+                if (optimize) {
+                  DEBUG && I.start('Optimization')
 
-                DEBUG && I.start('AST -> CSS')
-                let css = toCss(tailwindCssAst)
-                DEBUG && I.end('AST -> CSS')
+                  DEBUG && I.start('AST -> CSS')
+                  let css = toCss(tailwindCssAst)
+                  DEBUG && I.end('AST -> CSS')
 
-                DEBUG && I.start('Lightning CSS')
-                let optimized = optimizeCss(css, {
-                  minify: typeof optimize === 'object' ? optimize.minify : true,
-                })
-                DEBUG && I.end('Lightning CSS')
+                  DEBUG && I.start('Lightning CSS')
+                  let optimized = optimizeCss(css, {
+                    minify: typeof optimize === 'object' ? optimize.minify : true,
+                  })
+                  DEBUG && I.end('Lightning CSS')
 
-                DEBUG && I.start('CSS -> PostCSS AST')
-                context.optimizedPostCssAst = postcss.parse(optimized.code, result.opts)
-                DEBUG && I.end('CSS -> PostCSS AST')
+                  DEBUG && I.start('CSS -> PostCSS AST')
+                  context.optimizedPostCssAst = postcss.parse(optimized.code, result.opts)
+                  DEBUG && I.end('CSS -> PostCSS AST')
 
-                DEBUG && I.end('Optimization')
-              } else {
-                // Convert our AST to a PostCSS AST
-                DEBUG && I.start('Transform Tailwind CSS AST into PostCSS AST')
-                context.cachedPostCssAst = cssAstToPostCssAst(postcss, tailwindCssAst, root.source)
-                DEBUG && I.end('Transform Tailwind CSS AST into PostCSS AST')
+                  DEBUG && I.end('Optimization')
+                } else {
+                  // Convert our AST to a PostCSS AST
+                  DEBUG && I.start('Transform Tailwind CSS AST into PostCSS AST')
+                  context.cachedPostCssAst = cssAstToPostCssAst(postcss, tailwindCssAst, root.source)
+                  DEBUG && I.end('Transform Tailwind CSS AST into PostCSS AST')
+                }
               }
-            }
 
-            context.tailwindCssAst = tailwindCssAst
+              context.tailwindCssAst = tailwindCssAst
+            }
 
             DEBUG && I.start('Update PostCSS AST')
             root.removeAll()
@@ -375,3 +386,55 @@ function tailwindcss(opts: PluginOptions = {}): AcceptedPlugin {
 }
 
 export default Object.assign(tailwindcss, { postcss: true }) as PluginCreator<PluginOptions>
+
+export async function hashCandidates(candidates: string[] | Iterable<string>): Promise<string> {
+  const encoder = new TextEncoder()
+  const content = Array.isArray(candidates) ? candidates.join('\0') : Array.from(candidates).join('\0')
+  const hashBuffer = await globalThis.crypto.subtle.digest('SHA-256', encoder.encode(content))
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+}
+
+export function compileStream(
+  stream: ReadableStream<Uint8Array>,
+  opts: PluginOptions = {},
+): ReadableStream<Uint8Array> {
+  const textDecoder = new TextDecoderStream()
+  const textEncoder = new TextEncoderStream()
+  let buffer = ''
+
+  const transform = new TransformStream<string, string>({
+    transform(chunk) {
+      buffer += chunk
+    },
+    async flush(controller) {
+      const base = opts.base ?? process.cwd()
+      const compiler = await compile(buffer, {
+        base,
+        onDependency: () => {},
+        shouldRewriteUrls: opts.transformAssetUrls ?? true,
+      })
+      const candidates: string[] = []
+      if (compiler.features & Features.Utilities) {
+        const sources = (() => {
+          if (compiler.root === 'none') return []
+          if (compiler.root === null) return [{ base, pattern: '**/*', negated: false }]
+          return [{ ...compiler.root, negated: false }]
+        })().concat(compiler.sources)
+        const scanner = new Scanner({ sources })
+        candidates.push(...scanner.scan())
+      }
+      let output = compiler.build(candidates)
+      const optimize = opts.optimize ?? process.env.NODE_ENV === 'production'
+      if (optimize) {
+        output = optimizeCss(output, {
+          minify: typeof opts.optimize === 'object' ? opts.optimize.minify : true,
+        }).code
+      }
+      controller.enqueue(output)
+    },
+  })
+
+  return stream.pipeThrough(textDecoder).pipeThrough(transform).pipeThrough(textEncoder)
+}

@@ -3,4 +3,7 @@
 import { expect } from 'bun:test'
 import serializer from '../../packages/tailwindcss/src/test-utils/custom-serializer.ts'
 
-expect.addSnapshotSerializer(serializer as any)
+try {
+  ;(expect as any).addSnapshotSerializer?.(serializer as any)
+} catch {}
+
