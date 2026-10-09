@@ -152,7 +152,7 @@ jobs:
             sudo pkg install -y -f curl node npm
             curl -sSf https://static.rust-lang.org/rustup/archive/1.27.1/x86_64-unknown-freebsd/rustup-init -o rustup-init
             chmod +x rustup-init && ./rustup-init -y --profile minimal && source "$HOME/.cargo/env"
-            cd crates/node && npx --yes @napi-rs/cli@3.7.4 build --platform --release && strip -x *.node
+            cd crates/node && npx --yes -p @napi-rs/cli@3.7.4 napi build --platform --release && strip -x *.node
       - uses: actions/upload-artifact@v6
         with:
           name: bindings-freebsd-x64

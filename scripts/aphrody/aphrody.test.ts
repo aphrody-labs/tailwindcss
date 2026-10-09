@@ -54,6 +54,8 @@ describe('bunify', () => {
     ['npx prettier .', 'bun x prettier .'],
     ['cargo test && vitest run --hideSkippedTests', 'cargo test && bun test'],
     ['tsup-node', 'tsup-node'],
+    ['turbo build --filter=!./playgrounds/*', "turbo build '--filter=!./playgrounds/*'"],
+    ['bun run --filter=tailwindcss test:ui', 'bun run --filter=tailwindcss test:ui'],
   ])('%s', (input, output) => {
     expect(rewriteScript(input)).toBe(output)
     expect(rewriteScript(output)).toBe(output)

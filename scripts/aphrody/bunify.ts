@@ -26,6 +26,8 @@ const RULES: [RegExp, string][] = [
   [/\bpnpm --filter[= ]([^ ]+) run /g, 'bun run --filter=$1 '],
   [/(^|&& |; )node (?:\.\/)?((?:scripts|\.)\/)/g, '$1bun ./$2'],
   [/(^|&& |; )npx /g, '$1bun x '],
+  // A glob that matches nothing fails in the Bun shell (`bun run` on Windows); pnpm's sh passed it on as is.
+  [/(^| )(--filter=[^ '"]*\*[^ '"]*)/g, "$1'$2'"],
 ]
 
 export function rewriteScript(script: string): string {
