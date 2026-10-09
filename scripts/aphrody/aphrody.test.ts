@@ -63,7 +63,7 @@ describe('bunify', () => {
     let text =
       '{\n  "scripts": {\n    "build": "pnpm run build:x"\n  },\n  "packageManager": "pnpm@10.0.0"\n}\n'
     expect(rewrite('package.json', text)).toBe(
-      '{\n  "scripts": {\n    "build": "bun run build:x"\n  },\n  "packageManager": "bun@1.4.2"\n}\n',
+      '{\n  "scripts": {\n    "build": "bun run build:x"\n  },\n  "packageManager": "bun@1.4.3-aphrody.2"\n}\n',
     )
     expect(rewrite('README.md', text)).toBe(text)
   })

@@ -11,7 +11,7 @@
 import { join, relative } from 'node:path'
 import { ROOT, workspaceDirs } from './workspaces.ts'
 
-export const BUN_VERSION = '1.4.2'
+export const BUN_VERSION = '1.4.3-aphrody.2'
 
 // Whole-script replacements, matched exactly (root package.json).
 const SCRIPTS: Record<string, string> = {
