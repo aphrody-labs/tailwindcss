@@ -31,6 +31,31 @@ describe('compileStream', () => {
     expect(output).not.toContain('baz')
   })
 
+  it('decodes a multi-byte character split across chunks', async () => {
+    let bytes = new TextEncoder().encode('@tailwind utilities;\n@utility foo { content: "é"; }')
+    let split = bytes.indexOf(0xc3) + 1
+    let output = await readAll(
+      compileStream(
+        new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(bytes.subarray(0, split))
+            controller.enqueue(bytes.subarray(split))
+            controller.close()
+          },
+        }),
+        { candidates: ['foo'] },
+      ),
+    )
+
+    expect(output).toContain('content: "é"')
+  })
+
+  it('rejects when the CSS does not compile', async () => {
+    await expect(
+      readAll(compileStream(streamOf('.a { @apply unknown-utility; }'))),
+    ).rejects.toThrow()
+  })
+
   it('emits no utilities without candidates', async () => {
     let output = await readAll(
       compileStream(streamOf('@tailwind utilities;\n@utility foo-bar { color: blue; }')),

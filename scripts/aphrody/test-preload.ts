@@ -4,12 +4,12 @@
 import { expect } from 'bun:test'
 import serializer from '../../packages/tailwindcss/src/test-utils/custom-serializer.ts'
 
-let addSnapshotSerializer = (expect as any).addSnapshotSerializer
-if (typeof addSnapshotSerializer === 'function') {
-  addSnapshotSerializer(serializer)
-} else {
+try {
+  ;(expect as any).addSnapshotSerializer(serializer)
+} catch (error) {
+  // Bun releases before 984c0a12081 lack the method or throw "Not implemented".
   console.warn(
-    `test-preload: expect.addSnapshotSerializer is missing in Bun ${Bun.version}; ` +
+    `test-preload: expect.addSnapshotSerializer is unavailable in Bun ${Bun.version} (${error}); ` +
       'use the Aphrody Bun fork (package.json packageManager) for snapshot parity.',
   )
 }
