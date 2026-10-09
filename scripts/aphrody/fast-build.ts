@@ -1,5 +1,9 @@
-// Fast parallel build pipeline using Bun.build for Tailwind CSS monorepo packages.
-// Compiles packages/tailwindcss, @tailwindcss-postcss, @tailwindcss-node, @tailwindcss-cli, @tailwindcss-browser.
+// `bun run build:fast`: JS-only development build with Bun.build, in parallel, of
+// tailwindcss, @tailwindcss/postcss, @tailwindcss/node, @tailwindcss/cli and
+// @tailwindcss/browser. It does not build the oxide binding (Rust), the other
+// packages (vite, webpack, turbopack, upgrade, standalone) nor the .d.ts files,
+// and tailwindcss/dist also gets index.* next to lib.*. Releases and CI use
+// `bun run build` (turbo + tsup).
 
 import { copyFileSync, existsSync, mkdirSync } from 'node:fs'
 import { join, resolve } from 'node:path'
@@ -7,7 +11,7 @@ import { join, resolve } from 'node:path'
 const ROOT = resolve(import.meta.dir, '..', '..')
 const startTime = performance.now()
 
-console.log('⚡ Starting Bun fast-build pipeline...')
+console.log('fast-build: Bun.build of 5 packages')
 
 async function buildTailwindCss() {
   const pkgDir = join(ROOT, 'packages', 'tailwindcss')
@@ -228,6 +232,22 @@ async function buildBrowser() {
     loader: {
       '.css': 'text',
     },
+    // Same stub as packages/@tailwindcss-browser/tsup.config.ts.
+    plugins: [
+      {
+        name: 'patch-intellisense-apis',
+        setup(build) {
+          build.onLoad({ filter: /intellisense\.ts$/ }, () => ({
+            loader: 'ts',
+            contents: `
+              export function getClassList() { return [] }
+              export function getVariants() { return [] }
+              export function canonicalizeCandidates() { return [] }
+            `,
+          }))
+        },
+      },
+    ],
     define: {
       'process.env.NODE_ENV': JSON.stringify('production'),
       'process.env.FEATURES_ENV': JSON.stringify('stable'),
@@ -252,7 +272,7 @@ const built = await Promise.all([
 ])
 
 const durationMs = (performance.now() - startTime).toFixed(1)
-console.log(`✅ Fast build completed in ${durationMs}ms:`)
+console.log(`fast-build: done in ${durationMs}ms:`)
 for (const name of built) {
   console.log(`   - ${name}`)
 }

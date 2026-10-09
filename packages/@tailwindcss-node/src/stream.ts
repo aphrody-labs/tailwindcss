@@ -1,36 +1,33 @@
 import { compile, type CompileOptions } from './compile'
 
-export async function hashCandidates(candidates: string[] | Iterable<string>): Promise<string> {
-  const encoder = new TextEncoder()
-  const content = Array.isArray(candidates) ? candidates.join('\0') : Array.from(candidates).join('\0')
-  const hashBuffer = await globalThis.crypto.subtle.digest('SHA-256', encoder.encode(content))
-  return Array.from(new Uint8Array(hashBuffer))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('')
-}
-
+/**
+ * Compiles a CSS stream with `compile()` and emits the result of
+ * `compiler.build(candidates)`. The input is buffered until the stream ends.
+ * No source scanning happens here: pass the candidates explicitly.
+ */
 export function compileStream(
   stream: ReadableStream<Uint8Array>,
-  options?: CompileOptions & { candidates?: string[] },
+  options: Partial<CompileOptions> & { candidates?: string[] } = {},
 ): ReadableStream<Uint8Array> {
-  const textDecoder = new TextDecoderStream()
-  const textEncoder = new TextEncoderStream()
+  let { candidates = [], ...compileOptions } = options
   let buffer = ''
 
-  const transform = new TransformStream<string, string>({
+  let transform = new TransformStream<string, string>({
     transform(chunk) {
       buffer += chunk
     },
     async flush(controller) {
-      const compileOptions: CompileOptions = options ?? {
-        base: process.cwd(),
-        onDependency: () => {},
-      }
-      const compiler = await compile(buffer, compileOptions)
-      const compiled = compiler.build(options?.candidates ?? [])
-      controller.enqueue(compiled)
+      let compiler = await compile(buffer, {
+        ...compileOptions,
+        base: compileOptions.base ?? process.cwd(),
+        onDependency: compileOptions.onDependency ?? (() => {}),
+      })
+      controller.enqueue(compiler.build(candidates))
     },
   })
 
-  return stream.pipeThrough(textDecoder).pipeThrough(transform).pipeThrough(textEncoder)
+  return stream
+    .pipeThrough(new TextDecoderStream())
+    .pipeThrough(transform)
+    .pipeThrough(new TextEncoderStream())
 }

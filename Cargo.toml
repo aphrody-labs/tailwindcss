@@ -3,11 +3,4 @@ resolver = "2"
 members = ["crates/*"]
 
 [profile.release]
-lto = "thin"
-codegen-units = 16
-opt-level = 3
-
-[profile.dev]
-codegen-units = 256
-incremental = true
-debug = 1
+lto = true

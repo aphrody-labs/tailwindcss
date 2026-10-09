@@ -1,37 +1,41 @@
 import { describe, expect, it } from 'bun:test'
-import { compileStream, hashCandidates } from './index'
+import { compileStream } from './index'
 
-describe('@tailwindcss/node web features', () => {
-  it('hashes candidate lists consistently using crypto.subtle', async () => {
-    const list = ['flex', 'hidden', 'p-4', 'bg-red-500']
-    const hashA = await hashCandidates(list)
-    const hashB = await hashCandidates([...list])
-    expect(hashA).toBe(hashB)
-    expect(typeof hashA).toBe('string')
-    expect(hashA.length).toBe(64) // SHA-256 hex string
+function streamOf(...chunks: string[]) {
+  let encoder = new TextEncoder()
+  return new ReadableStream<Uint8Array>({
+    start(controller) {
+      for (let chunk of chunks) controller.enqueue(encoder.encode(chunk))
+      controller.close()
+    },
+  })
+}
 
-    const hashDifferent = await hashCandidates(['flex', 'hidden'])
-    expect(hashA).not.toBe(hashDifferent)
+async function readAll(stream: ReadableStream<Uint8Array>) {
+  let decoder = new TextDecoder()
+  let output = ''
+  for await (let chunk of stream) output += decoder.decode(chunk, { stream: true })
+  return output + decoder.decode()
+}
+
+describe('compileStream', () => {
+  it('compiles a chunked CSS stream with the given candidates', async () => {
+    let output = await readAll(
+      compileStream(streamOf('@tailwind utilities;\n@utility foo-', 'bar { color: blue; }'), {
+        candidates: ['foo-bar', 'baz'],
+      }),
+    )
+
+    expect(output).toContain('.foo-bar')
+    expect(output).toContain('color: blue')
+    expect(output).not.toContain('baz')
   })
 
-  it('compiles CSS via native Web Streams (ReadableStream)', async () => {
-    const encoder = new TextEncoder()
-    const decoder = new TextDecoder()
-    const css = '@utility foo-bar { color: blue; }'
+  it('emits no utilities without candidates', async () => {
+    let output = await readAll(
+      compileStream(streamOf('@tailwind utilities;\n@utility foo-bar { color: blue; }')),
+    )
 
-    const inStream = new ReadableStream({
-      start(controller) {
-        controller.enqueue(encoder.encode(css))
-        controller.close()
-      },
-    })
-
-    const outStream = compileStream(inStream)
-    let output = ''
-    for await (const chunk of outStream) {
-      output += decoder.decode(chunk)
-    }
-
-    expect(output).toContain('foo-bar')
+    expect(output).not.toContain('.foo-bar')
   })
 })

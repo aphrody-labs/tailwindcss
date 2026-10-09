@@ -279,5 +279,3 @@ function runResolver(
     }),
   )
 }
-
-export * from './stream'

@@ -20,6 +20,8 @@ through npm aliases (`"tailwindcss": "npm:@aphrody/tailwindcss@<v>"`), so `@impo
 - `bun install` (lockfile `bun.lock`, isolated linker). Workspaces, catalog, patched dependencies and the build allow
   list live in the root `package.json`; `pnpm-workspace.yaml` and `pnpm-lock.yaml` are removed.
 - `bun run build`, `bun run test` (`cargo test && bun test`), `bun run test:integrations`.
+- `bun run build:fast` (`scripts/aphrody/fast-build.ts`): JS-only dev build of tailwindcss, node, postcss, cli and
+  browser with `Bun.build`; no oxide binding, no `.d.ts`, not used by CI or releases.
 - Script rewrite (pnpm/npm/node/vitest to bun): `scripts/aphrody/bunify.ts` (`--check`, `--write`).
 - Workspace helpers (replace `pnpm -r`): `scripts/aphrody/workspaces.ts`.
 - Integration test projects are still installed with pnpm, like a user's project.
