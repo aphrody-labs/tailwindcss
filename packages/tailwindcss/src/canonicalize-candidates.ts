@@ -1766,6 +1766,16 @@ function isAttributeSelector(node: SelectorParser.SelectorNode): boolean {
   return node.value[0] === '[' && node.value[node.value.length - 1] === ']'
 }
 
+// Pseudo-elements from CSS 1 and 2 that browsers still accept with a single
+// colon. See: https://www.w3.org/TR/selectors-4/#pseudo-element-syntax
+const LEGACY_PSEUDO_ELEMENTS = new Set([':before', ':after', ':first-line', ':first-letter'])
+
+function isPseudoElement(
+  node: SelectorParser.SelectorNode | SelectorParser.SelectorFunctionNode,
+): boolean {
+  return node.value.startsWith('::') || LEGACY_PSEUDO_ELEMENTS.has(node.value.toLowerCase())
+}
+
 function modernizeArbitraryValuesVariant(
   variant: Variant,
   options: InternalCanonicalizeOptions,
@@ -2101,7 +2111,8 @@ function modernizeArbitraryValuesVariant(
           if (prefixedVariant) {
             replaceObject(variant, {
               kind: 'arbitrary',
-              selector: target.value,
+              // Pseudo-elements can't be used inside `&:is(…)`, so keep the `&`
+              selector: isPseudoElement(target) ? `&${target.value}` : target.value,
               relative: false,
             } satisfies Variant)
 
@@ -3044,17 +3055,17 @@ function* combinations<T>(arr: T[]): Generator<T[]> {
   }
 }
 
-function intersection<T>(a: Set<T>, b: Set<T>): Set<T> {
+export function intersection<T>(a: Set<T>, b: Set<T>): Set<T> {
   // @ts-expect-error Set.prototype.intersection is only available in Node.js v22+
   if (typeof a.intersection === 'function') return a.intersection(b)
 
   // Polyfill for environments that do not support Set.prototype.intersection yet
   if (a.size === 0 || b.size === 0) return new Set<T>()
 
-  let result = new Set<T>(a)
-  for (let item of b) {
-    if (!result.has(item)) {
-      result.delete(item)
+  let result = new Set<T>()
+  for (let item of a) {
+    if (b.has(item)) {
+      result.add(item)
     }
   }
 
