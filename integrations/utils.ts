@@ -1,5 +1,4 @@
 import dedent from 'dedent'
-import fastGlob from 'fast-glob'
 import { exec, execFile, spawn, type ChildProcess } from 'node:child_process'
 import fs from 'node:fs/promises'
 import { createServer } from 'node:net'
@@ -490,7 +489,7 @@ export function test(
             return content
           },
           async glob(pattern) {
-            let files = await fastGlob(pattern, { cwd: root })
+            let files = await Array.fromAsync(new Bun.Glob(pattern).scan({ cwd: root }))
             return Promise.all(
               files.map(async (file) => {
                 let content = await fs.readFile(path.join(root, file), 'utf8')
