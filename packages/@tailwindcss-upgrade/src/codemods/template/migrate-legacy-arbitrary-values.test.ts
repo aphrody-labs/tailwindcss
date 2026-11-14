@@ -1,5 +1,5 @@
 import { __unstable__loadDesignSystem } from '@tailwindcss/node'
-import { expect, test } from 'vitest'
+import { expect, test } from 'bun:test'
 import { migrateLegacyArbitraryValues } from './migrate-legacy-arbitrary-values'
 
 test.each([

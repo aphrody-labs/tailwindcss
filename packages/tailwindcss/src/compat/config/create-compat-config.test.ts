@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest'
+import { describe, expect, test } from 'bun:test'
 import { buildDesignSystem } from '../../design-system'
 import { Theme } from '../../theme'
 import { createCompatConfig } from './create-compat-config'

@@ -1,10 +1,10 @@
 import remapping from '@jridgewell/remapping'
+import { expect, test } from 'bun:test'
 import dedent from 'dedent'
 import MagicString from 'magic-string'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 import { SourceMapGenerator, type RawSourceMap } from 'source-map-js'
-import { test } from 'vitest'
 import { compile } from '..'
 import createPlugin from '../plugin'
 import { DefaultMap } from '../utils/default-map'
@@ -81,7 +81,7 @@ function toRawSourceMap(map: DecodedSourceMap): string {
   return generator.toString()
 }
 
-test('source maps trace back to @import location', async ({ expect }) => {
+test('source maps trace back to @import location', async () => {
   let { sources, annotations } = await run({
     input: css`
       @import 'tailwindcss';
@@ -585,7 +585,7 @@ test('source maps trace back to @import location', async ({ expect }) => {
   `)
 })
 
-test('source maps are generated for utilities', async ({ expect }) => {
+test('source maps are generated for utilities', async () => {
   let {
     sources,
     css: output,
@@ -655,7 +655,7 @@ test('source maps are generated for utilities', async ({ expect }) => {
   `)
 })
 
-test('utilities have source maps pointing to the utilities node', async ({ expect }) => {
+test('utilities have source maps pointing to the utilities node', async () => {
   let { sources, annotations } = await run({
     input: `@tailwind utilities;`,
     candidates: [
@@ -680,7 +680,7 @@ test('utilities have source maps pointing to the utilities node', async ({ expec
   `)
 })
 
-test('source maps match the latest build', async ({ expect }) => {
+test('source maps match the latest build', async () => {
   let input = css`
     @tailwind utilities;
     @utility custom {
@@ -714,7 +714,7 @@ test('source maps match the latest build', async ({ expect }) => {
   }
 })
 
-test('@apply generates source maps', async ({ expect }) => {
+test('@apply generates source maps', async () => {
   let { sources, annotations } = await run({
     input: css`
       .foo {
@@ -760,7 +760,7 @@ test('@apply generates source maps', async ({ expect }) => {
   `)
 })
 
-test('@variant generates source maps', async ({ expect }) => {
+test('@variant generates source maps', async () => {
   let { sources, annotations } = await run({
     input: css`
       .foo {
@@ -828,7 +828,7 @@ test('@variant generates source maps', async ({ expect }) => {
   `)
 })
 
-test('license comments preserve source locations', async ({ expect }) => {
+test('license comments preserve source locations', async () => {
   let { sources, annotations } = await run({
     input: `/*! some comment */`,
   })
@@ -845,7 +845,7 @@ test('license comments preserve source locations', async ({ expect }) => {
   `)
 })
 
-test('license comments with new lines preserve source locations', async ({ expect }) => {
+test('license comments with new lines preserve source locations', async () => {
   let { sources, annotations } = await run({
     input: `/*! some \n comment */`,
   })
@@ -866,9 +866,7 @@ test('license comments with new lines preserve source locations', async ({ expec
   `)
 })
 
-test('Source locations for `addBase` point to the `@plugin` that generated them', async ({
-  expect,
-}) => {
+test('Source locations for `addBase` point to the `@plugin` that generated them', async () => {
   let { sources, annotations } = await run({
     input: css`
       @plugin "./plugin.js";

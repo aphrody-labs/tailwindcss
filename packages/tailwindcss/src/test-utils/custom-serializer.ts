@@ -1,4 +1,4 @@
-import type { SnapshotSerializer } from 'vitest'
+import type { SnapshotSerializer } from 'bun:test'
 
 // We're reducing the precision of parameters to the `oklab()` function from
 // our snapshots as we've observed lightningcss generating different decimal

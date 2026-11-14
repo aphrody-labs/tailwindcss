@@ -1,4 +1,4 @@
-import { expect, test } from 'vitest'
+import { expect, test } from 'bun:test'
 import { type DesignSystem } from './design-system'
 import { __unstable__loadDesignSystem } from './index'
 

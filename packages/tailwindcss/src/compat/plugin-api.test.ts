@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'bun:test'
 import { compile } from '..'
 import plugin from '../plugin'
 import { compileCss, run } from '../test-utils/run'
@@ -149,9 +149,7 @@ describe('theme', async () => {
     `)
   })
 
-  test('plugin theme values can reference legacy theme keys that have been replaced with bare value support', async ({
-    expect,
-  }) => {
+  test('plugin theme values can reference legacy theme keys that have been replaced with bare value support', async () => {
     expect(
       await run(
         ['animate-duration-316'],
@@ -194,9 +192,7 @@ describe('theme', async () => {
     `)
   })
 
-  test('plugin theme values that support bare values are merged with other values for that theme key', async ({
-    expect,
-  }) => {
+  test('plugin theme values that support bare values are merged with other values for that theme key', async () => {
     expect(
       await run(
         ['animate-duration-316', 'animate-duration-slow'],
@@ -936,9 +932,7 @@ describe('theme', async () => {
     expect(fn).toHaveBeenCalledWith('blue')
   })
 
-  test("`theme('*.DEFAULT')` resolves to `undefined` when all theme keys in that namespace have a suffix", async ({
-    expect,
-  }) => {
+  test("`theme('*.DEFAULT')` resolves to `undefined` when all theme keys in that namespace have a suffix", async () => {
     let input = css`
       @tailwind utilities;
       @plugin "my-plugin";
@@ -1001,9 +995,7 @@ describe('theme', async () => {
     expect(fn).toHaveBeenCalledWith('darkred')
   })
 
-  test('keys that do not exist return the default value (or undefined if none)', async ({
-    expect,
-  }) => {
+  test('keys that do not exist return the default value (or undefined if none)', async () => {
     let input = css`
       @tailwind utilities;
       @plugin "my-plugin";
@@ -4594,9 +4586,7 @@ describe('config()', () => {
   })
 
   // https://github.com/tailwindlabs/tailwindcss/issues/19721
-  test('matchUtilities does not match Object.prototype properties as values', async ({
-    expect,
-  }) => {
+  test('matchUtilities does not match Object.prototype properties as values', async () => {
     // These should not crash or produce output
     expect(
       await run(

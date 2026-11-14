@@ -1,4 +1,4 @@
-import { expect, test } from 'vitest'
+import { expect, test } from 'bun:test'
 import { buildDesignSystem } from '../../design-system'
 import { Theme } from '../../theme'
 import { resolveConfig } from './resolve-config'
@@ -112,9 +112,7 @@ test('theme can be extended', () => {
   expect(replacedThemeKeys).toEqual(new Set(['colors', 'fontFamily']))
 })
 
-test('theme keys can reference other theme keys using the theme function regardless of order', ({
-  expect,
-}) => {
+test('theme keys can reference other theme keys using the theme function regardless of order', () => {
   let design = buildDesignSystem(new Theme())
 
   let { resolvedConfig, replacedThemeKeys } = resolveConfig(design, [

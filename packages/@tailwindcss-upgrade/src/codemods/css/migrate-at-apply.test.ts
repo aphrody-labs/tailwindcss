@@ -1,7 +1,7 @@
 import { __unstable__loadDesignSystem } from '@tailwindcss/node'
+import { expect, it, vi } from 'bun:test'
 import dedent from 'dedent'
 import postcss from 'postcss'
-import { expect, it, vi } from 'vitest'
 import type { Config } from '../../../../tailwindcss/src/compat/plugin-api'
 import * as versions from '../../utils/version'
 import { migrateAtApply } from './migrate-at-apply'

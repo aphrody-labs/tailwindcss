@@ -1,5 +1,5 @@
 import { __unstable__loadDesignSystem } from '@tailwindcss/node'
-import { expect, test, vi } from 'vitest'
+import { expect, test, vi } from 'bun:test'
 import * as versions from '../../utils/version'
 import { migrateCamelcaseInNamedValue } from './migrate-camelcase-in-named-value'
 vi.spyOn(versions, 'isMajor').mockReturnValue(true)

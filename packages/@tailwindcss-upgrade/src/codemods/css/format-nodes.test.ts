@@ -1,5 +1,5 @@
+import { expect, it } from 'bun:test'
 import postcss, { type Plugin } from 'postcss'
-import { expect, it } from 'vitest'
 import { formatNodes } from './format-nodes'
 import { sortBuckets } from './sort-buckets'
 

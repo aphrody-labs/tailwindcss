@@ -1,6 +1,6 @@
+import { describe, expect, test } from 'bun:test'
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { describe, expect, test } from 'vitest'
 import { compile } from '.'
 import plugin from './plugin'
 import { compileCss, pretty, run } from './test-utils/run'

@@ -1,5 +1,6 @@
+import { expect, test } from 'bun:test'
 import dedent from 'dedent'
-import { assert, expect, test } from 'vitest'
+import assert from 'node:assert'
 import { toCss, type AstNode } from '../ast'
 import * as CSS from '../css-parser'
 import { createTranslationMap } from './source-map'

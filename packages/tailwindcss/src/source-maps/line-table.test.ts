@@ -1,5 +1,5 @@
+import { expect, test } from 'bun:test'
 import dedent from 'dedent'
-import { expect, test } from 'vitest'
 import { createLineTable } from './line-table'
 
 const css = dedent

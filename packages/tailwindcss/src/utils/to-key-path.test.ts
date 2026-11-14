@@ -1,4 +1,4 @@
-import { expect, it } from 'vitest'
+import { expect, it } from 'bun:test'
 import { toKeyPath } from './to-key-path'
 
 it('can convert key paths to arrays', () => {

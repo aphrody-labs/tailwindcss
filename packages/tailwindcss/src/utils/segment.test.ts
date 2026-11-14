@@ -1,4 +1,4 @@
-import { expect, it } from 'vitest'
+import { expect, it } from 'bun:test'
 import { segment } from './segment'
 
 it('should result in a single segment when the separator is not present', () => {

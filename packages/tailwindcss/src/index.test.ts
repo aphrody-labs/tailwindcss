@@ -1,6 +1,6 @@
+import { describe, expect, it, test } from 'bun:test'
 import fs from 'node:fs'
 import path from 'node:path'
-import { describe, expect, it, test } from 'vitest'
 import { compile, Features, Polyfills } from '.'
 import { cartesian } from './cartesian'
 import type { PluginAPI } from './compat/plugin-api'

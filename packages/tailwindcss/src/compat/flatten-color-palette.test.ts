@@ -1,4 +1,4 @@
-import { expect, test } from 'vitest'
+import { expect, test } from 'bun:test'
 import flattenColorPalette from './flatten-color-palette'
 
 test('it should handle private __CSS_VALUES__ to resolve to the right value', () => {

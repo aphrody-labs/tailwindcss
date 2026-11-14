@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest'
+import { describe, expect, test } from 'bun:test'
 import { buildDesignSystem } from '../design-system'
 import { Theme, ThemeOptions } from '../theme'
 import { applyConfigToTheme, keyPathToCssProperty } from './apply-config-to-theme'

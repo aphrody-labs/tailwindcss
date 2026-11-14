@@ -1,6 +1,6 @@
+import { expect, test } from 'bun:test'
 import dedent from 'dedent'
 import { SourceMapGenerator, type RawSourceMap } from 'source-map-js'
-import { expect, test } from 'vitest'
 import { visualizeSourceMap, visualizeSourceMapRanges } from './visualize-source-map'
 
 const css = dedent

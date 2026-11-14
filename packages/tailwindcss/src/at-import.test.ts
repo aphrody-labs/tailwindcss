@@ -1,5 +1,5 @@
+import { expect, test, vi } from 'bun:test'
 import dedent from 'dedent'
-import { expect, test, vi } from 'vitest'
 import { compile, type Config } from './index'
 import plugin from './plugin'
 import { compileCss, run } from './test-utils/run'

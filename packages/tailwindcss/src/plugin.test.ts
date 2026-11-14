@@ -1,4 +1,4 @@
-import { expect, test } from 'vitest'
+import { expect, test } from 'bun:test'
 import plugin from './plugin'
 import { compileCss } from './test-utils/run'
 

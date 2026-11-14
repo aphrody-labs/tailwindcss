@@ -1,4 +1,4 @@
-import { expect, test } from 'vitest'
+import { expect, test } from 'bun:test'
 import createPlugin from './plugin'
 import { run } from './test-utils/run'
 import { Compounds, compoundsForSelectors } from './variants'

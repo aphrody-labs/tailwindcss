@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest'
+import { describe, expect, test } from 'bun:test'
 import { toCss } from './ast'
 import { SignatureFeatures } from './canonicalize-candidates'
 import { parse } from './css-parser'

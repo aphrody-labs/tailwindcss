@@ -1,4 +1,4 @@
-import { expect, it, vi } from 'vitest'
+import { expect, it, vi } from 'bun:test'
 import { LRUDefaultMap } from './lru-default-map'
 
 it('should generate default values like a DefaultMap', () => {

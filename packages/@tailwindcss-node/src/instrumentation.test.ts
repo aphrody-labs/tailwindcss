@@ -1,5 +1,5 @@
+import { expect, it } from 'bun:test'
 import { stripVTControlCharacters } from 'util'
-import { expect, it } from 'vitest'
 import { Instrumentation } from './instrumentation'
 
 it('should add instrumentation using start/end markers', () => {

@@ -1,5 +1,5 @@
 import { __unstable__loadDesignSystem } from '@tailwindcss/node'
-import { expect, test, vi } from 'vitest'
+import { expect, test, vi } from 'bun:test'
 import type { UserConfig } from '../../../../tailwindcss/src/compat/config/types'
 import type { DesignSystem } from '../../../../tailwindcss/src/design-system'
 import * as versions from '../../utils/version'

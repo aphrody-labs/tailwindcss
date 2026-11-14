@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'bun:test'
 import { compile, type Config } from '..'
 import { default as plugin } from '../plugin'
 import { compileCss, run } from '../test-utils/run'
@@ -305,9 +305,7 @@ test('Variants in CSS overwrite variants from plugins', async () => {
 })
 
 describe('theme callbacks', () => {
-  test('tuple values from the config overwrite `@theme default` tuple-ish values from the CSS theme', async ({
-    expect,
-  }) => {
+  test('tuple values from the config overwrite `@theme default` tuple-ish values from the CSS theme', async () => {
     expect(
       await run(
         ['leading-base', 'leading-md', 'leading-xl', 'prose'],
@@ -648,9 +646,7 @@ describe('default font family compatibility', () => {
     `)
   })
 
-  test('overriding `fontFamily.sans[1].fontFeatureSettings` sets `--default-font-feature-settings`', async ({
-    expect,
-  }) => {
+  test('overriding `fontFamily.sans[1].fontFeatureSettings` sets `--default-font-feature-settings`', async () => {
     expect(
       await run(
         ['font-sans'],
@@ -687,9 +683,7 @@ describe('default font family compatibility', () => {
     `)
   })
 
-  test('overriding `fontFamily.sans[1].fontVariationSettings` sets `--default-font-variation-settings`', async ({
-    expect,
-  }) => {
+  test('overriding `fontFamily.sans[1].fontVariationSettings` sets `--default-font-variation-settings`', async () => {
     expect(
       await run(
         ['font-sans'],
@@ -726,9 +720,7 @@ describe('default font family compatibility', () => {
     `)
   })
 
-  test('overriding `fontFeatureSettings` and `fontVariationSettings` for `fontFamily.sans` sets `--default-font-feature-settings` and `--default-font-variation-settings`', async ({
-    expect,
-  }) => {
+  test('overriding `fontFeatureSettings` and `fontVariationSettings` for `fontFamily.sans` sets `--default-font-feature-settings` and `--default-font-variation-settings`', async () => {
     expect(
       await run(
         ['font-sans'],
@@ -769,9 +761,7 @@ describe('default font family compatibility', () => {
     `)
   })
 
-  test('overriding `--font-family-sans` in `@theme` without `default` preserves the original `--default-font-*` values', async ({
-    expect,
-  }) => {
+  test('overriding `--font-family-sans` in `@theme` without `default` preserves the original `--default-font-*` values', async () => {
     expect(
       await run(
         ['font-sans'],
@@ -814,9 +804,7 @@ describe('default font family compatibility', () => {
     `)
   })
 
-  test('overriding `fontFamily.sans` in a config file with an array sets `--default-font-family`', async ({
-    expect,
-  }) => {
+  test('overriding `fontFamily.sans` in a config file with an array sets `--default-font-family`', async () => {
     expect(
       await run(
         ['font-sans'],
@@ -852,9 +840,7 @@ describe('default font family compatibility', () => {
     `)
   })
 
-  test('overriding `fontFamily.sans` in a config file with an unexpected type is ignored', async ({
-    expect,
-  }) => {
+  test('overriding `fontFamily.sans` in a config file with an unexpected type is ignored', async () => {
     expect(
       await run(
         ['font-sans'],
@@ -922,9 +908,7 @@ describe('default font family compatibility', () => {
     `)
   })
 
-  test('overriding `fontFamily.mono[1].fontFeatureSettings` sets `--default-mono-font-feature-settings`', async ({
-    expect,
-  }) => {
+  test('overriding `fontFamily.mono[1].fontFeatureSettings` sets `--default-mono-font-feature-settings`', async () => {
     expect(
       await run(
         ['font-mono'],
@@ -963,9 +947,7 @@ describe('default font family compatibility', () => {
     `)
   })
 
-  test('overriding `fontFamily.mono[1].fontVariationSettings` sets `--default-mono-font-variation-settings`', async ({
-    expect,
-  }) => {
+  test('overriding `fontFamily.mono[1].fontVariationSettings` sets `--default-mono-font-variation-settings`', async () => {
     expect(
       await run(
         ['font-mono'],
@@ -1004,9 +986,7 @@ describe('default font family compatibility', () => {
     `)
   })
 
-  test('overriding `fontFeatureSettings` and `fontVariationSettings` for `fontFamily.mono` sets `--default-mono-font-feature-settings` and `--default-mono-font-variation-settings`', async ({
-    expect,
-  }) => {
+  test('overriding `fontFeatureSettings` and `fontVariationSettings` for `fontFamily.mono` sets `--default-mono-font-feature-settings` and `--default-mono-font-variation-settings`', async () => {
     expect(
       await run(
         ['font-mono'],
@@ -1047,9 +1027,7 @@ describe('default font family compatibility', () => {
     `)
   })
 
-  test('overriding `--font-family-mono` in `@theme` without `default` preserves the original `--default-mono-font-*` values', async ({
-    expect,
-  }) => {
+  test('overriding `--font-family-mono` in `@theme` without `default` preserves the original `--default-mono-font-*` values', async () => {
     expect(
       await run(
         ['font-mono'],
@@ -1092,9 +1070,7 @@ describe('default font family compatibility', () => {
     `)
   })
 
-  test('overriding `fontFamily.mono` in a config file with an unexpected type is ignored', async ({
-    expect,
-  }) => {
+  test('overriding `fontFamily.mono` in a config file with an unexpected type is ignored', async () => {
     expect(
       await run(
         ['font-mono'],

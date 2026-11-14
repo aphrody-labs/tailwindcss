@@ -1,6 +1,6 @@
+import { describe, expect, it, vi } from 'bun:test'
 import dedent from 'dedent'
 import postcss from 'postcss'
-import { describe, expect, it, vi } from 'vitest'
 import { Stylesheet } from '../../stylesheet'
 import * as versions from '../../utils/version'
 import { formatNodes } from './format-nodes'

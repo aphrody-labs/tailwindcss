@@ -1,6 +1,6 @@
+import { expect, it } from 'bun:test'
 import dedent from 'dedent'
 import postcss from 'postcss'
-import { expect, it } from 'vitest'
 import { formatNodes } from './format-nodes'
 import { migrateTailwindDirectives } from './migrate-tailwind-directives'
 import { sortBuckets } from './sort-buckets'

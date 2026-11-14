@@ -4,3 +4,7 @@
 [run]
 # `node` in scripts and shebangs resolves to Bun.
 bun = true
+
+[test]
+# Replaces vitest snapshotSerializers (packages/tailwindcss/vitest.config.mts).
+preload = ["./packages/tailwindcss/src/test-utils/bun-preload.ts"]

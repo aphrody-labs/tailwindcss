@@ -1,9 +1,9 @@
+import { describe, expect, onTestFinished, test } from 'bun:test'
 import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import url from 'node:url'
-import { describe, expect, onTestFinished, test } from 'vitest'
 import { loadFragments, preview, release } from './changelog.mjs'
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url))

@@ -1,5 +1,5 @@
 import { __unstable__loadDesignSystem } from '@tailwindcss/node'
-import { describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'bun:test'
 import * as versions from '../../utils/version'
 import { migratePrefix } from './migrate-prefix'
 vi.spyOn(versions, 'isMajor').mockReturnValue(true)

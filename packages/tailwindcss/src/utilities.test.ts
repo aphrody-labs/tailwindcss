@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'bun:test'
 import { compile } from '.'
 import { compileCss, run } from './test-utils/run'
 import { isValidFunctionalUtilityName, isValidStaticUtilityName } from './utilities'

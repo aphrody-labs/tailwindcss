@@ -1,7 +1,7 @@
 import { __unstable__loadDesignSystem } from '@tailwindcss/node'
+import { expect, it, vi } from 'bun:test'
 import dedent from 'dedent'
 import postcss from 'postcss'
-import { expect, it, vi } from 'vitest'
 import * as versions from '../../utils/version'
 import { formatNodes } from './format-nodes'
 import { migratePreflight } from './migrate-preflight'

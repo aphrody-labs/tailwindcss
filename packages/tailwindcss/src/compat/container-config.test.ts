@@ -1,4 +1,4 @@
-import { expect, test } from 'vitest'
+import { expect, test } from 'bun:test'
 import { run } from '../test-utils/run'
 
 const css = String.raw

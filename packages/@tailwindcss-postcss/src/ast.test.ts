@@ -1,6 +1,6 @@
+import { expect, it } from 'bun:test'
 import dedent from 'dedent'
 import postcss from 'postcss'
-import { expect, it } from 'vitest'
 import { toCss } from '../../tailwindcss/src/ast'
 import { parse } from '../../tailwindcss/src/css-parser'
 import { cssAstToPostCssAst, postCssAstToCssAst } from './ast'

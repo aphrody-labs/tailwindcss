@@ -1,4 +1,4 @@
-import { expect, test } from 'vitest'
+import { expect, test } from 'bun:test'
 import { __unstable__loadDesignSystem } from '.'
 import { decl, rule } from './ast'
 import plugin from './plugin'

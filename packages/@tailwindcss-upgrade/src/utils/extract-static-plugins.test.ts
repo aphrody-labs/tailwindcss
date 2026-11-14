@@ -1,5 +1,5 @@
+import { describe, expect, test } from 'bun:test'
 import dedent from 'dedent'
-import { describe, expect, test } from 'vitest'
 import { extractStaticImportMap, findStaticPlugins } from './extract-static-plugins'
 
 const js = dedent

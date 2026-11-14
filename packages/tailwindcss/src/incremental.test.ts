@@ -1,6 +1,6 @@
+import { expect, test, vi } from 'bun:test'
 import fs from 'node:fs'
 import path from 'node:path'
-import { expect, test, vi } from 'vitest'
 import { compile } from './index'
 
 const css = String.raw

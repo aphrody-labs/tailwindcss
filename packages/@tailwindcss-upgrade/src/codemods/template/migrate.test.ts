@@ -1,5 +1,5 @@
 import { __unstable__loadDesignSystem } from '@tailwindcss/node'
-import { describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'bun:test'
 import { DefaultMap } from '../../../../tailwindcss/src/utils/default-map'
 import * as versions from '../../utils/version'
 import { migrateCandidate as migrate } from './migrate'

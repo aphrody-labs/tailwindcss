@@ -1,6 +1,6 @@
+import { expect, it } from 'bun:test'
 import dedent from 'dedent'
 import postcss from 'postcss'
-import { expect, it } from 'vitest'
 import { formatNodes } from './format-nodes'
 import { migrateMissingLayers } from './migrate-missing-layers'
 import { sortBuckets } from './sort-buckets'

@@ -1,4 +1,4 @@
-import { expect, test } from 'vitest'
+import { expect, test } from 'bun:test'
 import { atRule, decl, styleRule, toCss } from '../ast'
 import { buildDesignSystem } from '../design-system'
 import { Theme } from '../theme'

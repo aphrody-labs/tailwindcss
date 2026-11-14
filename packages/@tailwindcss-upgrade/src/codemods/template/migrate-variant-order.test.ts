@@ -1,6 +1,6 @@
 import { __unstable__loadDesignSystem } from '@tailwindcss/node'
+import { expect, test, vi } from 'bun:test'
 import dedent from 'dedent'
-import { expect, test, vi } from 'vitest'
 import * as versions from '../../utils/version'
 import { migrateVariantOrder } from './migrate-variant-order'
 vi.spyOn(versions, 'isMajor').mockReturnValue(true)

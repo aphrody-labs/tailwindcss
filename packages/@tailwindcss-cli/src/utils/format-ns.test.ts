@@ -1,4 +1,4 @@
-import { expect, it } from 'vitest'
+import { expect, it } from 'bun:test'
 import { formatNanoseconds } from './format-ns'
 
 it.each([

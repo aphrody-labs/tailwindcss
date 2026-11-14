@@ -1,5 +1,5 @@
+import { describe, expect, it, test } from 'bun:test'
 import { transform } from 'lightningcss'
-import { describe, expect, it, test } from 'vitest'
 import { __unstable__loadDesignSystem } from '.'
 import { buildDesignSystem } from './design-system'
 import { Theme } from './theme'

@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest'
+import { describe, expect, test } from 'bun:test'
 import { decl, rule, toCss, type AstNode as CSSAstNode } from './ast'
 import { walk, WalkAction } from './walk'
 

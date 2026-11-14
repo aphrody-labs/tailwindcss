@@ -1,10 +1,10 @@
+import { afterEach, beforeEach, describe, expect, test, vi } from 'bun:test'
 import dedent from 'dedent'
 import { mkdir, mkdtemp, readFile, realpath, rm, unlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'path'
 import postcss from 'postcss'
 import atImport from 'postcss-import'
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { pretty } from '../../tailwindcss/src/test-utils/run'
 import tailwindcss, { type PluginOptions } from './index'
 

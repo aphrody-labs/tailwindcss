@@ -1,4 +1,4 @@
-import { expect, it } from 'vitest'
+import { expect, it } from 'bun:test'
 import { canonicalizeCalcExpressions } from './canonicalize-calc-expressions'
 
 it.each([

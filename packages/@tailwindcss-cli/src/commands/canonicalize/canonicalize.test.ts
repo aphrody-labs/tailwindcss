@@ -1,7 +1,7 @@
+import { describe, expect, test, vi } from 'bun:test'
 import path from 'node:path'
 import { PassThrough, Readable } from 'node:stream'
 import { fileURLToPath } from 'node:url'
-import { describe, expect, test, vi } from 'vitest'
 import { runCommandLine, streamStdin } from '.'
 import { normalizeWindowsSeparators } from '../../utils/test-helpers'
 

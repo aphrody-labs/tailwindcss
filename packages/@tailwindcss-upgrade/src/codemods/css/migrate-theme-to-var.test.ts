@@ -1,7 +1,7 @@
 import { __unstable__loadDesignSystem } from '@tailwindcss/node'
+import { expect, it } from 'bun:test'
 import dedent from 'dedent'
 import postcss from 'postcss'
-import { expect, it } from 'vitest'
 import { formatNodes } from './format-nodes'
 import { migrateThemeToVar } from './migrate-theme-to-var'
 import { sortBuckets } from './sort-buckets'
